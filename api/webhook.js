@@ -7,7 +7,9 @@ if (!process.env.BOT_TOKEN) {
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-// ===== START =====
+// =====================================================
+// START
+// =====================================================
 bot.start(async (ctx) => {
 
   await ctx.reply(
@@ -36,7 +38,9 @@ bot.start(async (ctx) => {
 
 });
 
-// ===== MENU BÁO GIÁ =====
+// =====================================================
+// MENU BÁO GIÁ
+// =====================================================
 bot.action("MENU_QUOTE", async (ctx) => {
 
   await ctx.answerCbQuery();
@@ -61,13 +65,15 @@ bot.action("MENU_QUOTE", async (ctx) => {
 
 });
 
-// ===== THUÊ MÁY =====
+// =====================================================
+// THUÊ MÁY
+// =====================================================
 bot.action("RENT_MACHINE", async (ctx) => {
 
   await ctx.answerCbQuery();
 
   await ctx.reply(
-    "Chọn tình trạng máy",
+    "📋 Chọn tình trạng máy",
     Markup.inlineKeyboard([
       [
         Markup.button.callback(
@@ -86,7 +92,92 @@ bot.action("RENT_MACHINE", async (ctx) => {
 
 });
 
-// ===== TEST SUPABASE =====
+// =====================================================
+// BÁN MÁY
+// =====================================================
+bot.action("SALE_MACHINE", async (ctx) => {
+
+  await ctx.answerCbQuery();
+
+  await ctx.reply(
+    "🚧 Chức năng báo giá bán máy đang phát triển"
+  );
+
+});
+
+// =====================================================
+// MÁY CŨ
+// =====================================================
+bot.action("USED_MACHINE", async (ctx) => {
+
+  await ctx.answerCbQuery();
+
+  try {
+
+    const machines = await getMachines();
+
+    if (!machines || machines.length === 0) {
+
+      await ctx.reply(
+        "❌ Chưa có dữ liệu model"
+      );
+
+      return;
+    }
+
+    const buttons = machines.map((m) => [
+      Markup.button.callback(
+        m.model,
+        `MODEL_${m.id}`
+      )
+    ]);
+
+    await ctx.reply(
+      "📋 Chọn model",
+      Markup.inlineKeyboard(buttons)
+    );
+
+  } catch (err) {
+
+    console.error(err);
+
+    await ctx.reply(
+      "❌ Không đọc được dữ liệu model"
+    );
+
+  }
+
+});
+
+// =====================================================
+// MÁY MỚI
+// =====================================================
+bot.action("NEW_MACHINE", async (ctx) => {
+
+  await ctx.answerCbQuery();
+
+  await ctx.reply(
+    "🚧 Chức năng máy mới đang phát triển"
+  );
+
+});
+
+// =====================================================
+// TEST MODEL 1
+// =====================================================
+bot.action("MODEL_1", async (ctx) => {
+
+  await ctx.answerCbQuery();
+
+  await ctx.reply(
+    "💰 Nhập giá thuê tháng (VNĐ)"
+  );
+
+});
+
+// =====================================================
+// TEST SUPABASE
+// =====================================================
 bot.hears("test", async (ctx) => {
 
   try {
@@ -106,14 +197,16 @@ bot.hears("test", async (ctx) => {
     console.error(err);
 
     await ctx.reply(
-      "❌ Lỗi đọc dữ liệu máy từ Supabase"
+      "❌ Lỗi đọc dữ liệu từ Supabase"
     );
 
   }
 
 });
 
-// ===== WEBHOOK =====
+// =====================================================
+// WEBHOOK
+// =====================================================
 export default async function handler(req, res) {
 
   if (req.method === "GET") {

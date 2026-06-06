@@ -37,7 +37,9 @@ bot.start(async (ctx) => {
 });
 
 // ===== MENU BÁO GIÁ =====
-bot.hears("📋 Tạo báo giá", async (ctx) => {
+bot.action("MENU_QUOTE", async (ctx) => {
+
+  await ctx.answerCbQuery();
 
   await ctx.reply(
     "📋 Chọn loại báo giá",

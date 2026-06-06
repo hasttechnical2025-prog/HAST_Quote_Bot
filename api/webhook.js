@@ -2,6 +2,8 @@ import { Telegraf, Markup } from "telegraf";
 
 import {
   getCustomers,
+  getCustomerById,
+  searchCustomers,
   createCustomer
 } from "../lib/customer.js";
 
@@ -476,7 +478,95 @@ bot.hears(
 
   }
 );
+bot.action(
+  /^CUSTOMER_(\d+)$/,
+  async (ctx) => {
 
+    await ctx.answerCbQuery();
+
+    const customerId =
+      Number(ctx.match[1]);
+
+    const customer =
+      await getCustomerById(
+        customerId
+      );
+
+    const session =
+      await getSession(
+        ctx.from.id
+      );
+
+    const payload =
+      session.payload;
+
+    payload.customer_id =
+      customer.id;
+
+    payload.customer_name =
+      customer.customer_name;
+
+    payload.telegram_user_id =
+      ctx.from.id;
+
+    const quote =
+      await createQuote(
+        payload
+      );
+
+    await clearSession(
+      ctx.from.id
+    );
+
+    await ctx.reply(
+      `✅ Đã tạo báo giá
+
+🏢 ${customer.customer_name}
+
+Số BG:
+${quote.quote_no}`,
+
+      Markup.inlineKeyboard([
+        [
+          Markup.button.callback(
+            "🆕 BÁO GIÁ MỚI",
+            "MENU_QUOTE"
+          )
+        ],
+        [
+          Markup.button.callback(
+            "🏠 MENU CHÍNH",
+            "MAIN_MENU"
+          )
+        ]
+      ])
+    );
+
+  }
+);
+bot.action(
+  "NEW_CUSTOMER",
+  async (ctx) => {
+
+    await ctx.answerCbQuery();
+
+    const session =
+      await getSession(
+        ctx.from.id
+      );
+
+    await saveSession(
+      ctx.from.id,
+      "WAIT_NEW_CUSTOMER",
+      session.payload
+    );
+
+    await ctx.reply(
+      "🏢 Nhập tên khách hàng mới"
+    );
+
+  }
+);
 // ======================================
 // WEBHOOK
 // ======================================
@@ -625,7 +715,48 @@ bot.on(
 
       return;
     }
+    if (
+  session.current_step ===
+  "WAIT_NEW_CUSTOMER"
+) {
 
+  const customer =
+    await createCustomer(
+      ctx.message.text
+    );
+
+  const payload =
+    session.payload;
+
+  payload.customer_id =
+    customer.id;
+
+  payload.customer_name =
+    customer.customer_name;
+
+  payload.telegram_user_id =
+    ctx.from.id;
+
+  const quote =
+    await createQuote(
+      payload
+    );
+
+  await clearSession(
+    ctx.from.id
+  );
+
+  await ctx.reply(
+    `✅ Đã tạo báo giá
+
+🏢 ${customer.customer_name}
+
+Số BG:
+${quote.quote_no}`
+  );
+
+  return;
+}
     if (
       session.current_step ===
       "WAIT_CUSTOMER"

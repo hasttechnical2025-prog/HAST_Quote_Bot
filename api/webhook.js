@@ -529,69 +529,71 @@ bot.on(
     }
 
     if (
-      session.current_step ===
-      "WAIT_BW_PRICE"
-    ) {
-
-      const payload =
-        session.payload;
-
-      payload.bw_copy_price =
-        Number(
-          ctx.message.text
-        );
-
-      if (payload.is_color) {
-
-  if (
-  payload.is_color === false
+  session.current_step ===
+  "WAIT_BW_PRICE"
 ) {
 
-  payload.color_copy_price = 0;
+  const payload =
+    session.payload;
 
+  payload.bw_copy_price =
+    Number(
+      ctx.message.text
+        .replaceAll(".", "")
+        .replaceAll(",", "")
+    );
+
+  if (
+    isNaN(
+      payload.bw_copy_price
+    )
+  ) {
+
+    await ctx.reply(
+      "❌ Giá copy đen không hợp lệ"
+    );
+
+    return;
+  }
+
+  // =========================
+  // MÁY ĐEN TRẮNG
+  // =========================
+  if (
+    payload.is_color === false
+  ) {
+
+    payload.color_copy_price = 0;
+
+    await saveSession(
+      ctx.from.id,
+      "WAIT_CUSTOMER",
+      payload
+    );
+
+    await ctx.reply(
+      "🏢 Nhập tên khách hàng"
+    );
+
+    return;
+  }
+
+  // =========================
+  // MÁY MÀU
+  // =========================
   await saveSession(
     ctx.from.id,
-    "WAIT_CUSTOMER",
+    "WAIT_COLOR_PRICE",
     payload
   );
 
   await ctx.reply(
-    "🏢 Nhập tên khách hàng"
+    "🎨 Nhập giá copy màu"
   );
 
   return;
-}
-
-await saveSession(
-  ctx.from.id,
-  "WAIT_COLOR_PRICE",
-  payload
-);
-
-await ctx.reply(
-  "🎨 Nhập giá copy màu"
-);
-
-} else {
-
-  await saveSession(
-    ctx.from.id,
-    "WAIT_CUSTOMER",
-    payload
-  );
-
-  await ctx.reply(
-    "🏢 Nhập tên khách hàng"
-  );
 
 }
-
-      await ctx.reply(
-        "🎨 Nhập giá copy màu"
-      );
-
-      return;
-    }
 
     if (
       session.current_step ===

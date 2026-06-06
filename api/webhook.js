@@ -325,6 +325,57 @@ ${machine.default_bw_price?.toLocaleString("vi-VN")} VNĐ`,
   }
 );
 
+bot.action(
+  "USE_DEFAULT_PRICE",
+  async (ctx) => {
+
+    await ctx.answerCbQuery();
+
+    const session =
+      await getSession(
+        ctx.from.id
+      );
+
+    if (!session) return;
+
+    await saveSession(
+      ctx.from.id,
+      "WAIT_CUSTOMER",
+      session.payload
+    );
+
+    await ctx.reply(
+      "🏢 Nhập tên khách hàng"
+    );
+
+  }
+);
+bot.action(
+  "CUSTOM_PRICE",
+  async (ctx) => {
+
+    await ctx.answerCbQuery();
+
+    const session =
+      await getSession(
+        ctx.from.id
+      );
+
+    if (!session) return;
+
+    await saveSession(
+      ctx.from.id,
+      "WAIT_RENTAL_PRICE",
+      session.payload
+    );
+
+    await ctx.reply(
+      "💰 Nhập giá thuê tháng"
+    );
+
+  }
+);
+
 // ======================================
 // TRA CỨU MODEL
 // ======================================
@@ -492,15 +543,34 @@ bot.on(
 
       if (payload.is_color) {
 
+  if (
+  payload.is_color === false
+) {
+
+  payload.color_copy_price = 0;
+
   await saveSession(
     ctx.from.id,
-    "WAIT_COLOR_PRICE",
+    "WAIT_CUSTOMER",
     payload
   );
 
   await ctx.reply(
-    "🎨 Nhập giá copy màu"
+    "🏢 Nhập tên khách hàng"
   );
+
+  return;
+}
+
+await saveSession(
+  ctx.from.id,
+  "WAIT_COLOR_PRICE",
+  payload
+);
+
+await ctx.reply(
+  "🎨 Nhập giá copy màu"
+);
 
 } else {
 

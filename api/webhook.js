@@ -11,15 +11,27 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 bot.start(async (ctx) => {
 
   await ctx.reply(
-`🤖 HAST Quote Bot
-
-Chọn chức năng:
-
-📋 Tạo báo giá
-
-🔍 Tra cứu model
-
-📂 Danh sách báo giá`
+    "🤖 HAST Quote Bot\n\nChọn chức năng:",
+    Markup.inlineKeyboard([
+      [
+        Markup.button.callback(
+          "📋 TẠO BÁO GIÁ",
+          "MENU_QUOTE"
+        )
+      ],
+      [
+        Markup.button.callback(
+          "🔍 TRA CỨU MODEL",
+          "MENU_MODEL"
+        )
+      ],
+      [
+        Markup.button.callback(
+          "📂 DANH SÁCH BÁO GIÁ",
+          "MENU_LIST"
+        )
+      ]
+    ])
   );
 
 });

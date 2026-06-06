@@ -1,9 +1,35 @@
 import { Telegraf } from "telegraf";
-
+import { getMachines } from "../lib/quote.js";
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 bot.start(async (ctx) => {
+bot.hears("📋 Tạo báo giá", async (ctx) => {
 
+  try {
+
+    const machines = await getMachines();
+
+    let text = "📋 DANH SÁCH MODEL\n\n";
+
+    machines.forEach((m, index) => {
+
+      text += `${index + 1}. ${m.model}\n`;
+
+    });
+
+    await ctx.reply(text);
+
+  } catch (err) {
+
+    console.error(err);
+
+    await ctx.reply(
+      "❌ Lỗi đọc dữ liệu máy từ Supabase"
+    );
+
+  }
+
+});
   await ctx.reply(
 `🤖 HAST Quote Bot
 

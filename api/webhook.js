@@ -1,3 +1,5 @@
+import { Telegraf, Markup } from "telegraf";
+
 import {
   saveSession,
   getSession,
@@ -9,9 +11,6 @@ import {
   getMachineById,
   createQuote
 } from "../lib/quote.js";
-
-import { Telegraf, Markup } from "telegraf";
-import { getMachines } from "../lib/quote.js";
 
 if (!process.env.BOT_TOKEN) {
   throw new Error("BOT_TOKEN is missing");

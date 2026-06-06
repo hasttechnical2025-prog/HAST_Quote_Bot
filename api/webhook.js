@@ -278,11 +278,10 @@ bot.action(
       "WAIT_RENTAL_PRICE",
       {
         machine_id: machine.id,
-        machine_model:
-          machine.model,
+        machine_model: machine.model,
         quote_type: "RENT",
-        machine_condition:
-          "USED"
+        machine_condition: "USED",
+        is_color: machine.is_color
       }
     );
 
@@ -460,11 +459,31 @@ bot.on(
           ctx.message.text
         );
 
-      await saveSession(
-        ctx.from.id,
-        "WAIT_COLOR_PRICE",
-        payload
-      );
+      if (payload.is_color) {
+
+  await saveSession(
+    ctx.from.id,
+    "WAIT_COLOR_PRICE",
+    payload
+  );
+
+  await ctx.reply(
+    "🎨 Nhập giá copy màu"
+  );
+
+} else {
+
+  await saveSession(
+    ctx.from.id,
+    "WAIT_CUSTOMER",
+    payload
+  );
+
+  await ctx.reply(
+    "🏢 Nhập tên khách hàng"
+  );
+
+}
 
       await ctx.reply(
         "🎨 Nhập giá copy màu"

@@ -275,20 +275,51 @@ bot.action(
 
     await saveSession(
       ctx.from.id,
-      "WAIT_RENTAL_PRICE",
+      "CONFIRM_DEFAULT_PRICE",
       {
-        machine_id: machine.id,
-        machine_model: machine.model,
-        quote_type: "RENT",
-        machine_condition: "USED",
-        is_color: machine.is_color
+        machine_id:
+          machine.id,
+
+        machine_model:
+          machine.model,
+
+        is_color:
+          machine.is_color,
+
+        rental_price:
+          machine.default_rental_price,
+
+        bw_copy_price:
+          machine.default_bw_price,
+
+        color_copy_price:
+          machine.default_color_price
       }
     );
 
     await ctx.reply(
       `🖨 Model: ${machine.model}
 
-💰 Nhập giá thuê tháng (VNĐ)`
+💰 Giá thuê:
+${machine.default_rental_price?.toLocaleString("vi-VN")} VNĐ
+
+🖤 Giá BW:
+${machine.default_bw_price?.toLocaleString("vi-VN")} VNĐ`,
+
+      Markup.inlineKeyboard([
+        [
+          Markup.button.callback(
+            "✅ DÙNG GIÁ CHUẨN",
+            "USE_DEFAULT_PRICE"
+          )
+        ],
+        [
+          Markup.button.callback(
+            "✏️ NHẬP GIÁ KHÁC",
+            "CUSTOM_PRICE"
+          )
+        ]
+      ])
     );
 
   }

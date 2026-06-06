@@ -1,3 +1,15 @@
+import {
+  saveSession,
+  getSession,
+  clearSession
+} from "../lib/session.js";
+
+import {
+  getMachines,
+  getMachineById,
+  createQuote
+} from "../lib/quote.js";
+
 import { Telegraf, Markup } from "telegraf";
 import { getMachines } from "../lib/quote.js";
 
@@ -249,21 +261,36 @@ bot.action(
 // MODEL 1 DEMO
 // ======================================
 bot.action(
-  "MODEL_1",
+  /^MODEL_(\d+)$/,
   async (ctx) => {
 
     await ctx.answerCbQuery();
 
+    const machineId =
+      Number(ctx.match[1]);
+
+    const machine =
+      await getMachineById(
+        machineId
+      );
+
+    await saveSession(
+      ctx.from.id,
+      "WAIT_RENTAL_PRICE",
+      {
+        machine_id: machine.id,
+        machine_model:
+          machine.model,
+        quote_type: "RENT",
+        machine_condition:
+          "USED"
+      }
+    );
+
     await ctx.reply(
-      "💰 Nhập giá thuê tháng (VNĐ)",
-      Markup.inlineKeyboard([
-        [
-          Markup.button.callback(
-            "🏠 MENU CHÍNH",
-            "MAIN_MENU"
-          )
-        ]
-      ])
+      `🖨 Model: ${machine.model}
+
+💰 Nhập giá thuê tháng (VNĐ)`
     );
 
   }
@@ -368,6 +395,160 @@ bot.hears(
 // ======================================
 // WEBHOOK
 // ======================================
+bot.on(
+  "text",
+  async (ctx) => {
+
+    const session =
+      await getSession(
+        ctx.from.id
+      );
+
+    if (!session) return;
+
+    if (
+      session.current_step ===
+      "WAIT_RENTAL_PRICE"
+    ) {
+
+      const rentalPrice =
+        Number(
+          ctx.message.text
+            .replaceAll(".", "")
+            .replaceAll(",", "")
+        );
+
+      if (
+        isNaN(rentalPrice)
+      ) {
+
+        await ctx.reply(
+          "❌ Giá không hợp lệ"
+        );
+
+        return;
+      }
+
+      const payload =
+        session.payload;
+
+      payload.rental_price =
+        rentalPrice;
+
+      await saveSession(
+        ctx.from.id,
+        "WAIT_BW_PRICE",
+        payload
+      );
+
+      await ctx.reply(
+        "🖤 Nhập giá copy đen"
+      );
+
+      return;
+    }
+
+    if (
+      session.current_step ===
+      "WAIT_BW_PRICE"
+    ) {
+
+      const payload =
+        session.payload;
+
+      payload.bw_copy_price =
+        Number(
+          ctx.message.text
+        );
+
+      await saveSession(
+        ctx.from.id,
+        "WAIT_COLOR_PRICE",
+        payload
+      );
+
+      await ctx.reply(
+        "🎨 Nhập giá copy màu"
+      );
+
+      return;
+    }
+
+    if (
+      session.current_step ===
+      "WAIT_COLOR_PRICE"
+    ) {
+
+      const payload =
+        session.payload;
+
+      payload.color_copy_price =
+        Number(
+          ctx.message.text
+        );
+
+      await saveSession(
+        ctx.from.id,
+        "WAIT_CUSTOMER",
+        payload
+      );
+
+      await ctx.reply(
+        "🏢 Nhập tên khách hàng"
+      );
+
+      return;
+    }
+
+    if (
+      session.current_step ===
+      "WAIT_CUSTOMER"
+    ) {
+
+      const payload =
+        session.payload;
+
+      payload.customer_name =
+        ctx.message.text;
+
+      payload.telegram_user_id =
+        ctx.from.id;
+
+      const quote =
+        await createQuote(
+          payload
+        );
+
+      await clearSession(
+        ctx.from.id
+      );
+
+      await ctx.reply(
+        `✅ Đã tạo báo giá
+
+Số BG:
+${quote.quote_no}`,
+        Markup.inlineKeyboard([
+          [
+            Markup.button.callback(
+              "🆕 BÁO GIÁ MỚI",
+              "MENU_QUOTE"
+            )
+          ],
+          [
+            Markup.button.callback(
+              "🏠 MENU CHÍNH",
+              "MAIN_MENU"
+            )
+          ]
+        ])
+      );
+
+      return;
+    }
+
+  }
+);
 export default async function handler(
   req,
   res

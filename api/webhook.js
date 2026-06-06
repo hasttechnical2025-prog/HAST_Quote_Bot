@@ -1,48 +1,56 @@
-import { Telegraf } from "telegraf";
+import { Telegraf, Markup } from "telegraf";
 import { getMachines } from "../lib/quote.js";
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 bot.start(async (ctx) => {
 bot.hears("📋 Tạo báo giá", async (ctx) => {
 
-  try {
-
-    const machines = await getMachines();
-
-    let text = "📋 DANH SÁCH MODEL\n\n";
-
-    machines.forEach((m, index) => {
-
-      text += `${index + 1}. ${m.model}\n`;
-
-    });
-
-    await ctx.reply(text);
-
-  } catch (err) {
-
-    console.error(err);
-
-    await ctx.reply(
-      "❌ Lỗi đọc dữ liệu máy từ Supabase"
-    );
-
-  }
-
-});
   await ctx.reply(
-`🤖 HAST Quote Bot
-
-Chọn chức năng:
-
-📋 Tạo báo giá
-
-🔍 Tra cứu model
-
-📂 Danh sách báo giá`
+    "📋 Chọn loại báo giá",
+    Markup.inlineKeyboard([
+      [
+        Markup.button.callback(
+          "🖨 THUÊ MÁY",
+          "RENT_MACHINE"
+        )
+      ],
+      [
+        Markup.button.callback(
+          "💰 BÁN MÁY",
+          "SALE_MACHINE"
+        )
+      ]
+    ])
   );
 
 });
+
+bot.action(
+  "RENT_MACHINE",
+  async (ctx) => {
+
+    await ctx.answerCbQuery();
+
+    await ctx.reply(
+      "Chọn tình trạng máy",
+      Markup.inlineKeyboard([
+        [
+          Markup.button.callback(
+            "♻️ MÁY CŨ",
+            "USED_MACHINE"
+          )
+        ],
+        [
+          Markup.button.callback(
+            "✨ MÁY MỚI",
+            "NEW_MACHINE"
+          )
+        ]
+      ])
+    );
+
+  }
+);
 
 export default async function handler(req, res) {
 

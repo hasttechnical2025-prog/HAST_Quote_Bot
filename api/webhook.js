@@ -1,6 +1,11 @@
 import { Telegraf, Markup } from "telegraf";
 
 import {
+  getCustomers,
+  createCustomer
+} from "../lib/customer.js";
+
+import {
   saveSession,
   getSession,
   clearSession
